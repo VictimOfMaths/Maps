@@ -204,7 +204,6 @@ ggdraw()+
 dev.off()
 
 #Explore data a bit more
-
 #scatter coloured by country
 tiff("Outputs/LAALcDrgGB.tiff", units="in", width=7, height=6, res=500)
 ggplot(data, aes(x=alcrate, y=drgrate, colour=Country))+
