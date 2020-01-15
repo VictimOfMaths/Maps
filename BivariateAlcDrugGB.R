@@ -197,7 +197,7 @@ key <- ggplot(keydata)+
   # quadratic tiles
   coord_fixed()
 
-tiff("Outputs/BivariateAlcDrugsEngScot.tiff", units="in", width=8, height=14, res=300)
+tiff("Outputs/BivariateAlcDrugsGB.tiff", units="in", width=8, height=14, res=300)
 ggdraw()+
   draw_plot(map, 0,0,1,1)+
   draw_plot(key, 0.03,0.47,0.29,0.73)
@@ -206,7 +206,7 @@ dev.off()
 #Explore data a bit more
 
 #scatter coloured by country
-tiff("Outputs/LAALcDrgESW.tiff", units="in", width=7, height=6, res=500)
+tiff("Outputs/LAALcDrgGB.tiff", units="in", width=7, height=6, res=500)
 ggplot(data, aes(x=alcrate, y=drgrate, colour=Country))+
   geom_point()+
   geom_segment(x=-10, xend=45, y=-10, yend=45, colour="Black")+
@@ -222,7 +222,7 @@ ggplot(data, aes(x=alcrate, y=drgrate, colour=Country))+
 dev.off()
 
 #repeat with bivariate key overlaid
-tiff("Outputs/LAALcDrgTertESW.tiff", units="in", width=7, height=6, res=500)
+tiff("Outputs/LAALcDrgTertGB.tiff", units="in", width=7, height=6, res=500)
 ggplot(data, aes(x=alcrate, y=drgrate, colour=Country))+
   geom_rect(aes(xmin=0,xmax=alccut1, ymin=0, ymax=drgcut1), fill="#CABED0", colour=NA)+
   geom_rect(aes(xmin=0,xmax=alccut1, ymin=drgcut1, ymax=drgcut2), fill="#BC7C5F", colour=NA)+
@@ -246,7 +246,7 @@ ggplot(data, aes(x=alcrate, y=drgrate, colour=Country))+
 dev.off()
 
 #Bar charts with CIs
-tiff("Outputs/LAALcCIsESW.tiff", units="in", width=8, height=6, res=500)
+tiff("Outputs/LAALcCIsGB.tiff", units="in", width=8, height=6, res=500)
 ggplot(data, aes(x=fct_reorder(as.factor(LA), alcrate), y=alcrate, ymin=alcrate_lower_ci, 
                  ymax=alcrate_upper_ci, fill=Country))+
   geom_crossbar()+
@@ -260,7 +260,7 @@ ggplot(data, aes(x=fct_reorder(as.factor(LA), alcrate), y=alcrate, ymin=alcrate_
   theme(axis.text.x=element_blank(), axis.ticks.x=element_blank())
 dev.off()
 
-tiff("Outputs/LADrgCIsESW.tiff", units="in", width=8, height=6, res=500)
+tiff("Outputs/LADrgCIsGB.tiff", units="in", width=8, height=6, res=500)
 ggplot(data, aes(x=fct_reorder(as.factor(LA), drgrate), y=drgrate, ymin=drgrate_lower_ci, 
                  ymax=drgrate_upper_ci, fill=Country))+
   geom_crossbar()+
