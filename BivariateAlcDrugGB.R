@@ -203,6 +203,61 @@ ggdraw()+
   draw_plot(key, 0.03,0.47,0.29,0.73)
 dev.off()
 
+#Add zoomed in areas
+#London
+London <- ggplot(data)+
+  geom_map(aes(map_id=id, fill=colour), map=polygons, colour="White")+
+  xlim(500000,560000)+
+  ylim(156000,200000)+
+  theme_classic()+
+  scale_fill_identity()+
+  labs(title="Greater London")+
+  theme(axis.line=element_blank(), axis.ticks=element_blank(), axis.text=element_blank(),
+        axis.title=element_blank(), plot.title=element_text(face="bold"))
+
+#North-West England
+NWEng <- ggplot(data)+
+  geom_map(aes(map_id=id, fill=colour), map=polygons, colour="White")+
+  xlim(310000,440000)+
+  ylim(370000,430000)+
+  theme_classic()+
+  scale_fill_identity()+
+  labs(title="NW England")+
+  theme(axis.line=element_blank(), axis.ticks=element_blank(), axis.text=element_blank(),
+        axis.title=element_blank(), plot.title=element_text(face="bold"))
+
+#Tyne/Tees  
+NEEng <- ggplot(data)+
+  geom_map(aes(map_id=id, fill=colour), map=polygons, colour="White")+
+  xlim(405000,490000)+
+  ylim(505000,580000)+
+  theme_classic()+
+  scale_fill_identity()+
+  labs(title="NE England")+
+  theme(axis.line=element_blank(), axis.ticks=element_blank(), axis.text=element_blank(),
+        axis.title=element_blank(), plot.title=element_text(face="bold"))
+
+#Central Belt
+CScot <- ggplot(data)+
+  geom_map(aes(map_id=id, fill=colour), map=polygons, colour="White")+
+  xlim(220000,341000)+
+  ylim(620000,710000)+
+  theme_classic()+
+  scale_fill_identity()+
+  labs(title="Central Scotland")+
+  theme(axis.line=element_blank(), axis.ticks=element_blank(), axis.text=element_blank(),
+        axis.title=element_blank(), plot.title=element_text(face="bold"))
+
+tiff("Outputs/BivariateAlcDrugsGBZoomed.tiff", units="in", width=12, height=14, res=300)
+ggdraw()+
+  draw_plot(map, 0,0,0.65,1)+
+  draw_plot(key, 0.03,0.73,0.2,0.2)+
+  draw_plot(London, 0.65,0.03,0.3,0.2)+
+  draw_plot(NWEng, 0.63,0.26, 0.35, 0.18)+
+  draw_plot(NEEng, 0.62, 0.48, 0.2, 0.2)+
+  draw_plot(CScot, 0.6, 0.71, 0.3, 0.2)
+dev.off()
+
 #Explore data a bit more
 #scatter coloured by country
 tiff("Outputs/LAALcDrgGB.tiff", units="in", width=7, height=6, res=500)
