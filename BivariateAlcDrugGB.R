@@ -375,3 +375,124 @@ maps <- plot_grid(AlcLAGB, DrgLAGB, align="hv", labels=c("Alcohol", "Drugs"))
 tiff("Outputs/AlcDrgLAGB.tiff", units="in", width=14, height=14, res=300)
 plot_grid(title, maps, caption, ncol=1, rel_heights=c(0.08, 1, 0.05))
 dev.off()
+
+#Add zoomed in areas
+#Alcohol
+#London
+LondonAlc <- ggplot(data)+
+  geom_map(aes(map_id=id, fill=alcrate), map=polygons, colour="White")+
+  xlim(500000,560000)+
+  ylim(156000,200000)+
+  theme_classic()+
+  scale_fill_distiller(palette="YlGnBu", direction=1, na.value="White", guide=FALSE)+
+  labs(title="Greater London")+
+  theme(axis.line=element_blank(), axis.ticks=element_blank(), axis.text=element_blank(),
+        axis.title=element_blank(), plot.title=element_text(face="bold"))
+
+#North-West England
+NWEngAlc <- ggplot(data)+
+  geom_map(aes(map_id=id, fill=alcrate), map=polygons, colour="White")+
+  xlim(310000,440000)+
+  ylim(370000,430000)+
+  theme_classic()+
+  scale_fill_distiller(palette="YlGnBu", direction=1, na.value="White", guide=FALSE)+
+  labs(title="NW England")+
+  theme(axis.line=element_blank(), axis.ticks=element_blank(), axis.text=element_blank(),
+        axis.title=element_blank(), plot.title=element_text(face="bold"))
+
+#Tyne/Tees  
+NEEngAlc <- ggplot(data)+
+  geom_map(aes(map_id=id, fill=alcrate), map=polygons, colour="White")+
+  xlim(405000,490000)+
+  ylim(505000,580000)+
+  theme_classic()+
+  scale_fill_distiller(palette="YlGnBu", direction=1, na.value="White", guide=FALSE)+
+  labs(title="NE England")+
+  theme(axis.line=element_blank(), axis.ticks=element_blank(), axis.text=element_blank(),
+        axis.title=element_blank(), plot.title=element_text(face="bold"))
+
+#Central Belt
+CScotAlc <- ggplot(data)+
+  geom_map(aes(map_id=id, fill=alcrate), map=polygons, colour="White")+
+  xlim(220000,341000)+
+  ylim(620000,710000)+
+  theme_classic()+
+  scale_fill_distiller(palette="YlGnBu", direction=1, na.value="White", guide=FALSE)+
+  labs(title="Central Scotland")+
+  theme(axis.line=element_blank(), axis.ticks=element_blank(), axis.text=element_blank(),
+        axis.title=element_blank(), plot.title=element_text(face="bold"))
+
+AlcLAGB <- AlcLAGB+
+  labs(title="Regional patterns in deaths from alcohol in Great Britain",
+       subtitle="Comparative rates of alcohol-specific deaths by Local Authority",
+       caption="Data from Public Health England, NHS Wales & National Records of Scotland\nPlot by @VictimOfMaths")+
+  theme(legend.position="left")
+
+tiff("Outputs/AlcLAGBZoomed.tiff", units="in", width=12, height=14, res=300)
+ggdraw()+
+  draw_plot(AlcLAGB, 0,0,0.65,1)+
+  draw_plot(LondonAlc, 0.65,0.03,0.3,0.2)+
+  draw_plot(NWEngAlc, 0.63,0.26, 0.35, 0.18)+
+  draw_plot(NEEngAlc, 0.62, 0.48, 0.2, 0.2)+
+  draw_plot(CScotAlc, 0.6, 0.71, 0.3, 0.2)
+dev.off()
+
+#Drugs
+#London
+LondonDrg <- ggplot(data)+
+  geom_map(aes(map_id=id, fill=drgrate), map=polygons, colour="White")+
+  xlim(500000,560000)+
+  ylim(156000,200000)+
+  theme_classic()+
+  scale_fill_distiller(palette="YlOrRd", direction=1, na.value="White", guide=FALSE)+
+  labs(title="Greater London")+
+  theme(axis.line=element_blank(), axis.ticks=element_blank(), axis.text=element_blank(),
+        axis.title=element_blank(), plot.title=element_text(face="bold"))
+
+#North-West England
+NWEngDrg <- ggplot(data)+
+  geom_map(aes(map_id=id, fill=drgrate), map=polygons, colour="White")+
+  xlim(310000,440000)+
+  ylim(370000,430000)+
+  theme_classic()+
+  scale_fill_distiller(palette="YlOrRd", direction=1, na.value="White", guide=FALSE)+
+  labs(title="NW England")+
+  theme(axis.line=element_blank(), axis.ticks=element_blank(), axis.text=element_blank(),
+        axis.title=element_blank(), plot.title=element_text(face="bold"))
+
+#Tyne/Tees  
+NEEngDrg <- ggplot(data)+
+  geom_map(aes(map_id=id, fill=drgrate), map=polygons, colour="White")+
+  xlim(405000,490000)+
+  ylim(505000,580000)+
+  theme_classic()+
+  scale_fill_distiller(palette="YlOrRd", direction=1, na.value="White", guide=FALSE)+
+  labs(title="NE England")+
+  theme(axis.line=element_blank(), axis.ticks=element_blank(), axis.text=element_blank(),
+        axis.title=element_blank(), plot.title=element_text(face="bold"))
+
+#Central Belt
+CScotDrg <- ggplot(data)+
+  geom_map(aes(map_id=id, fill=drgrate), map=polygons, colour="White")+
+  xlim(220000,341000)+
+  ylim(620000,710000)+
+  theme_classic()+
+  scale_fill_distiller(palette="YlOrRd", direction=1, na.value="White", guide=FALSE)+
+  labs(title="Central Scotland")+
+  theme(axis.line=element_blank(), axis.ticks=element_blank(), axis.text=element_blank(),
+        axis.title=element_blank(), plot.title=element_text(face="bold"))
+
+DrgLAGB <- DrgLAGB+
+  labs(title="Regional patterns in deaths from drugs in Great Britain",
+       subtitle="Comparative rates of drug misuse deaths by Local Authority",
+       caption="Data from Office for National Statistics & National Records of Scotland\nPlot by @VictimOfMaths")+
+  theme(legend.position="left")
+
+tiff("Outputs/DrgLAGBZoomed.tiff", units="in", width=12, height=14, res=300)
+ggdraw()+
+  draw_plot(DrgLAGB, 0,0,0.65,1)+
+  draw_plot(LondonDrg, 0.65,0.03,0.3,0.2)+
+  draw_plot(NWEngDrg, 0.63,0.26, 0.35, 0.18)+
+  draw_plot(NEEngDrg, 0.62, 0.48, 0.2, 0.2)+
+  draw_plot(CScotDrg, 0.6, 0.71, 0.3, 0.2)
+dev.off()
