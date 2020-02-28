@@ -1,0 +1,54 @@
+rm(list=ls())
+
+library(tidyverse)
+library(data.table)
+library(readxl)
+library(curl)
+library(rgdal)
+library(paletteer)
+library(wesanderson)
+
+
+temp <- tempfile()
+source <- "https://www.ons.gov.uk/file?uri=%2fpeoplepopulationandcommunity%2fhealthandsocialcare%2fhealthandlifeexpectancies%2fdatasets%2fhealthstatelifeexpectancyatbirthandatage65bylocalareasuk%2fcurrent/hsleatbirthandatage65byukla201618.xlsx"
+temp <- curl_download(url=source, destfile=temp, quiet=FALSE, mode="wb")
+
+maledata <- read_excel(temp, sheet="HE - Male at birth", range="A4:Q416")
+femaledata <- read_excel(temp, sheet="HE - Female at birth", range="A4:Q416")
+
+maledata$sex <- "Male"
+femaledata$sex <- "Female"
+
+data <- rbind(maledata, femaledata)
+
+data <- subset(data, !is.na(`Area Codes`))
+
+names(data)[names(data)=="Area Codes"] <- "id"
+
+data$id <- case_when(
+  data$id=="E06000058" ~ "E06000029",
+  data$id=="E06000059" ~ "E10000009",
+  TRUE ~ data$id
+)
+
+#Read in shapefile of LA boundaries
+#from http://geoportal.statistics.gov.uk/datasets/counties-and-unitary-authorities-december-2017-full-clipped-boundaries-in-uk/data
+polygons <- readOGR("Shapefiles/Counties_and_Unitary_Authorities_December_2017_Full_Clipped_Boundaries_in_UK.shp")
+polygons$id <- as.character(polygons$ctyua17cd)
+polygons<-fortify(polygons, region="id")
+
+pal <- wes_palette("Zissou1", 100, type = "continuous")
+
+tiff("Outputs/HLEbyLA.tiff", units="in", width=14, height=8, res=300)
+ggplot(data)+
+  geom_map(aes(map_id=id, fill=HLE), map=polygons, colour="White")+
+  xlim(10000,655644)+
+  ylim(5337,700000)+
+  theme_classic()+
+  scale_fill_gradientn(colours=rev(pal), name="Healthy Life\nExpectancy")+
+  theme(axis.line=element_blank(), axis.ticks=element_blank(), axis.text=element_blank(),
+        axis.title=element_blank())+
+  facet_wrap(~sex)+
+  labs(title="Healthy life expectancy by Local Authority in England",
+       caption="Data from Office for National Statistics 2016-18 | Plot by @VictimOfMaths")
+dev.off()
