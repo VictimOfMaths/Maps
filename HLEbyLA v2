@@ -42,7 +42,7 @@ map.data <- map.data %>% drop_na("HLE")
 
 pal <- wes_palette("Zissou1", 100, type = "continuous")
 
-tiff("Outputs/HLEbyLA.tiff", units="in", width=14, height=8, res=300)
+tiff("Outputs/HLEbyLA.tiff", units="in", width=12, height=7, res=300)
 ggplot(data=map.data, aes(fill=HLE, geometry=geometry))+
   geom_sf(colour="White")+
   xlim(10000,655644)+
@@ -50,7 +50,8 @@ ggplot(data=map.data, aes(fill=HLE, geometry=geometry))+
   theme_classic()+
   scale_fill_gradientn(colours=rev(pal), name="Healthy Life\nExpectancy")+
   theme(axis.line=element_blank(), axis.ticks=element_blank(), axis.text=element_blank(),
-        axis.title=element_blank())+
+        axis.title=element_blank(), strip.background=element_blank(),
+        strip.text=element_text(face="bold"))+
   facet_wrap(~sex)+
   labs(title="Healthy life expectancy by Local Authority in England",
        caption="Data from Office for National Statistics 2016-18 | Plot by @VictimOfMaths")
