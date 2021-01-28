@@ -5,6 +5,7 @@ library(readxl)
 library(curl)
 library(sf)
 library(paletteer)
+library(forcats)
 
 #Download data
 temp <- tempfile()
@@ -37,6 +38,28 @@ data <- data %>%
   filter(ctyua17cd=="E06000028") %>% 
   mutate(ctyua17cd="E06000029") %>% 
   bind_rows(data)
+
+#Plot national level figures
+tiff("Outputs/HLELEBarsxcountry.tiff", units="in", width=8, height=6, res=500)
+data %>% filter(name %in% c("ENGLAND", "SCOTLAND", "NORTHERN IRELAND", "WALES")) %>% 
+  mutate(ULE=LE-HLE) %>%
+  gather(metric, value, c("HLE", "ULE")) %>% 
+  mutate(metric=factor(metric, levels=c("ULE", "HLE"))) %>% 
+  ggplot(aes(x=value, y=name, fill=metric))+
+  geom_col()+
+  scale_x_continuous(name="Years of life")+
+  scale_y_discrete(labels=c("England", "Northern Ireland", "Scotland", "Wales"), 
+                   name="")+
+  scale_fill_paletteer_d("rcartocolor::Safe", name="Years lived in",
+                         labels=c("Poor Health", "Good Health"))+
+  facet_wrap(~sex)+
+  theme_classic()+
+  theme(strip.background=element_blank(), strip.text=element_text(face="bold", size=rel(1)),
+        plot.title=element_text(face="bold", size=rel(1.2)))+
+  labs(title="We live a substantial proportion of our lives in poor health",
+       subtitle="Years of life lived by self-reported health status across the UK in 2016-18",
+       caption="Data from ONS | Plot by @VictimOfMaths")
+dev.off()
 
 #Read in shapefile of LA boundaries
 #Download shapefile of LA boundaries
@@ -107,7 +130,7 @@ analysis.data <- map.data %>%
     substr(ctyua17cd,1,1)=="N" ~ "Northern Ireland",
     substr(ctyua17cd,1,1)=="W" ~ "Wales"))
 
-tiff("Outputs/HLEbyLAScatter.tiff", units="in", width=8, height=6, res=500)
+tiff("Outputs/LEbyLAScatter.tiff", units="in", width=8, height=6, res=500)
 analysis.data %>% 
   select(ctyua17cd, country, sex, LE) %>% 
   filter(!is.na(country)) %>% 
@@ -121,11 +144,11 @@ analysis.data %>%
   theme_classic()+
   theme(plot.title=element_text(face="bold", size=rel(1.2)))+
   labs(title="Life Expectancy is higher for women in every UK Local Authority",
-       subtitle="Life Expectancy at Birth based on 2017-19 data",
+       subtitle="Life Expectancy at Birth based on 2016-18 data",
        caption="Data from ONS | Plot by @VictimOfMaths")
 dev.off()
 
-tiff("Outputs/LEbyLAScatter.tiff", units="in", width=8, height=6, res=500)
+tiff("Outputs/HLEbyLAScatter.tiff", units="in", width=8, height=6, res=500)
 analysis.data %>% 
   select(ctyua17cd, country, sex, HLE) %>% 
   filter(!is.na(country)) %>% 
@@ -139,7 +162,7 @@ analysis.data %>%
   theme_classic()+
   theme(plot.title=element_text(face="bold", size=rel(1.2)))+
   labs(title="Healthy Life Expectancy is broadly similar for men and women",
-       subtitle="Healthy Life Expectancy at Birth based on 2017-19 data",
+       subtitle="Healthy Life Expectancy at Birth based on 2016-18 data",
        caption="Data from ONS | Plot by @VictimOfMaths")
 dev.off()
 
