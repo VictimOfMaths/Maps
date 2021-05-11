@@ -46,7 +46,7 @@ plot1 <- ggplot()+
   geom_sf_text(data=Group_labels, aes(geometry=geom, label=Group.labe,
                                       hjust=just), size=rel(2.4), colour="Black")+
   scale_fill_paletteer_c("pals::ocean.haline", direction=-1,
-                         name="Proportion ever\nworking from home", limits=c(0,NA),
+                         name="Proportion ever working from home", limits=c(0,NA),
                          labels=label_percent(accuracy=1))+
   theme_void()+
   theme(plot.title=element_text(face="bold", size=rel(1.5)),
