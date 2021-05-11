@@ -46,15 +46,18 @@ plot1 <- ggplot()+
   geom_sf_text(data=Group_labels, aes(geometry=geom, label=Group.labe,
                                       hjust=just), size=rel(2.4), colour="Black")+
   scale_fill_paletteer_c("pals::ocean.haline", direction=-1,
-                         name="Cases per\n100,000", limits=c(0,NA))+
+                         name="Proportion ever\nworking from home", limits=c(0,NA),
+                         labels=label_percent(accuracy=1))+
   theme_void()+
   theme(plot.title=element_text(face="bold", size=rel(1.5)),
-        text=element_text(family="Roboto"))+
+        text=element_text(family="Roboto"), legend.position="top")+
+  guides(fill = guide_colorbar(title.position = 'top', title.hjust = .5,
+                                barwidth = unit(20, 'lines'), barheight = unit(.5, 'lines')))+
   labs(title="People in the South East are more likely to work from home",
-       subtitle="Self-reported prevalence of ever working from home based on data from the 2020 Annual Population Survey\nThe survey asked about working arrangements 'in normal times' so may not fully reflect working patterns\nduring the pandemic.",
+       subtitle="Self-reported prevalence of ever working from home based on data from the 2020\nAnnual Population Survey. The survey asked about working arrangements 'in normal times'\nso may not fully reflect working patterns during the pandemic.\n ",
        caption="Data from ONS, Cartogram from @carlbaker/House of Commons Library\nPlot by @VictimOfMaths")
 
-agg_tiff("Outputs/ONSWFHCartogram.tiff", units="in", width=9, height=10, res=800)
+agg_tiff("Outputs/ONSWFHCartogram.tiff", units="in", width=8, height=10, res=800)
 plot1
 dev.off()
 
