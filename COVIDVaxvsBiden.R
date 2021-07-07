@@ -3,6 +3,7 @@ rm(list=ls())
 library(tidyverse)
 library(curl)
 library(paletteer)
+library(lubridate)
 library(scales)
 library(gtools)
 library(sf)
@@ -43,6 +44,9 @@ vaxdata <- read.csv(tempvax) %>%
   mutate(FIPS=as.numeric(FIPS),
          per_vax=if_else(per_vax==0, NA_real_, per_vax/100))
 
+maxdate <- read.csv(tempvax) %>% 
+  mutate(date=as.Date(Date, format="%m/%d/%Y")) 
+
 votedata <- read.csv(tempvote) %>% 
   select(county_fips, per_dem) %>% 
   set_names(c("FIPS", "per_dem"))
@@ -50,7 +54,7 @@ votedata <- read.csv(tempvote) %>%
 data <- merge(vaxdata, votedata)
 
 #Save data for anyone who wants to draw their own map
-write.csv("Data/COVIDVaxvsVBiden.csv")
+write.csv("Data/COVIDVaxvsVBidenCounties.csv")
 
 #Scatter plot
 agg_tiff("Outputs/COVIDVaxvsBiden.tiff", units="in", width=7, height=7, res=800)
@@ -101,7 +105,7 @@ key <- ggplot(keydata)+
   geom_tile(aes(x=votetert, y=vaxtert, fill=RGB))+
   scale_fill_identity()+
   labs(x = expression("More Biden votes" %->%  ""),
-       y = expression("Higher vaccination rates" %->%  "")) +
+       y = expression("More vaccinations" %->%  "")) +
   theme_classic() +
   # make font small enough
   theme(
@@ -112,44 +116,44 @@ key <- ggplot(keydata)+
   # quadratic tiles
   coord_fixed()
 
-#Pull in county-level map
 shapefile <- counties(resolution="500k")
-
-stateshapes <- states(resolution="500k")
+stateshapefile <- states(resolution="500k")
 
 mapdata <- left_join(shapefile, plotdata)
 
-map <- ggplot(mapdata, aes(geometry=geometry, fill=fillcolour))+
-  geom_sf(colour="white", size=0.1)+
-  geom_sf(data=stateshapes, aes(geometry=geometry), fill=NA, )
-  xlim(-125, -66)+
-  ylim(26, 46)+
+maxdatelab <- paste0(month(max(maxdate$date), label=TRUE, abbr=FALSE), " ",
+                     day(max(maxdate$date)), " ", year(max(maxdate$date)))
+
+#Set up labels
+labels <- data.frame(x=c(-82, -113, -95, -80), y=c(47, 30, 28, 32),
+                     label=c("<span style='color:#ff3968;'>Red<span style='color:white;'> areas are GOP-leaning and have high vaccine coverage",
+                             "<span style='color:#6d87cc;'>Blue<span style='color:white;'> areas are Dem-leaning and have high vaccine coverage",
+                             "<span style='color:#f0f0f0;'>White<span style='color:white;'> areas are GOP-leaning and have low vaccine coverage",
+                             "<span style='color:#00cfc1;'>Turquoise<span style='color:white;'> areas are Dem-leaning and have low vaccine coverage"))
+
+map <- ggplot()+
+  geom_sf(data=mapdata, aes(geometry=geometry, fill=fillcolour), colour="white", size=0.1)+
+  geom_sf(data=stateshapefile, aes(geometry=geometry), colour="white", fill=NA)+
+  xlim(-125, -67)+
+  ylim(25, 48)+
   scale_fill_identity()+
   theme_void()+
   labs(title="US Counties with high vaccination rates are overwhelmingly Democrat-leaning",
-       subtitle="Proportion of votes case for Joe Biden in the 2020 US presidential election compared to the proportion of the population who have received\nat least 1 dose of COVID vaccine in US counties. Counties with missing vaccination data appear in black.\n",
+       subtitle=paste0("Proportion of votes case for Joe Biden in the 2020 US presidential election compared to the proportion of the population who have received\nat least 1 dose of COVID vaccine in US counties. Counties with missing vaccination data appear in black. Vaccination data up to ",
+                      maxdatelab, ".\n"),
        caption="Vaccination data from CDC | Voting data from Tony McGovern | Plot by @VictimOfMaths")+
   theme(text=element_text(family="Lato", colour="White"), plot.title.position="plot",
-        plot.caption.position="plot", plot.title=element_text(face="bold", size=rel(1.6)),
+        plot.caption.position="plot", plot.title=element_text(face="bold", size=rel(1.6), family="Merriweather"),
         plot.background=element_rect(fill="Grey10", colour="Grey10"),
-        plot.margin=unit(c(0.2,0.2,0.2,0.2), "cm"))+
-#These boxes need moving about, but even just adding one of them in increases the rendering time of the plot *massively* for reasons I don't understand
-  geom_textbox(aes(x=-120, y=35, label="<span style='color:#ff3968;'>Red<span style='color:white;'> areas are GOP-leaning and have high vaccine coverage"), 
-              width=grid::unit(0.1, "npc"), hjust=0, vjust=1, halign=0.5, size=rel(2.5),
-               fill="Grey10", colour="Grey10", box.padding = grid::unit(rep(0, 4), "pt"))+
-  geom_textbox(aes(x=-100, y=29, label="<span style='color:#6d87cc;'>Blue<span style='color:white;'> areas are Dem-leaning and have high vaccine coverage"), 
-               width=grid::unit(0.1, "npc"), hjust=0, vjust=1, halign=0.5, size=rel(2.5),
-               fill="Grey10", colour="Grey10", box.padding = grid::unit(rep(0, 4), "pt"))+
-  geom_textbox(aes(x=-85, y=45, label="<span style='color:#f0f0f0;'>White<span style='color:white;'> areas are GOP-leaning and have low vaccine coverage"), 
-               width=grid::unit(0.1, "npc"), hjust=0, vjust=1, halign=0.5, size=rel(2.5),
-               fill="Grey10", colour="Grey10", box.padding = grid::unit(rep(0, 4), "pt"))+
-  geom_textbox(aes(x=-80, y=32, label="<span style='color:#00cfc1;'>Turquoise<span style='color:white;'> areas are Dem-leaning and have low vaccine coverage"), 
-               width=grid::unit(0.1, "npc"), hjust=0, vjust=1, halign=0.5, size=rel(2.5),
+        plot.margin=unit(c(0.2,0.2,0.2,0.2), "cm"),
+        plot.subtitle=element_text(family="Merriweather", size=rel(0.85)))+
+  geom_textbox(data=labels, aes(x=x, y=y, label=label), 
+               width=grid::unit(0.1, "npc"), hjust=0, vjust=1, halign=0.5, size=rel(2.7),
                fill="Grey10", colour="Grey10", box.padding = grid::unit(rep(0, 4), "pt"))
 
   
-agg_tiff("Outputs/COVIDVaxvsBidenMap.tiff", units="in", width=10, height=5.4, res=200)
+agg_tiff("Outputs/COVIDVaxvsBidenMap.tiff", units="in", width=10, height=6.1, res=800)
 ggdraw()+
   draw_plot(map, 0,0,1,1)+
-  draw_plot(key, 0,0.01,0.3,0.3)
+  draw_plot(key, -0.06,0.01,0.3,0.3)
 dev.off()
