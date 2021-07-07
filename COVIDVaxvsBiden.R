@@ -2,12 +2,10 @@ rm(list=ls())
 
 library(tidyverse)
 library(curl)
-library(paletteer)
 library(lubridate)
 library(scales)
 library(gtools)
 library(sf)
-library(tigris)
 library(extrafont)
 library(ragg)
 library(ggtext)
@@ -66,8 +64,8 @@ ggplot(data, aes(x=per_dem, y=per_vax))+
                      label=label_percent(accuracy=1))+
   theme_custom()+
   coord_equal()+
-  labs(title="Biden voting counties have higher vaccination rates",
-       subtitle="Proportion of votes case for Joe Biden in the 2020 US presidential election against 1st dose\nCOVID vaccination coverage in US counties reporting data for both.",
+  labs(title="Biden-voting counties have higher vaccination rates",
+       subtitle="Proportion of votes cast for Joe Biden in the 2020 US presidential election against 1st dose\nCOVID vaccination coverage in US counties reporting data for both.",
        caption="Vaccination data from CDC | Voting data from Tony McGovern | Plot by @VictimOfMaths")
 dev.off()
 
@@ -116,8 +114,26 @@ key <- ggplot(keydata)+
   # quadratic tiles
   coord_fixed()
 
-shapefile <- counties(resolution="500k")
-stateshapefile <- states(resolution="500k")
+#shapefile <- counties(resolution="500k")
+shapeurl <- "https://www2.census.gov/geo/tiger/GENZ2020/shp/cb_2020_us_county_5m.zip"
+tempshape <- tempfile()
+tempshape2 <- tempfile()
+tempshape <- curl_download(url=shapeurl, destfile=tempshape, quiet=FALSE, mode="wb")
+unzip(zipfile=tempshape, exdir=tempshape2)
+
+#The actual shapefile has a different name each time you download it, so need to fish the name out of the unzipped file
+name <- list.files(tempshape2, pattern=".shp")[1]
+shapefile <- st_read(file.path(tempshape2, name))
+
+stateshapeurl <- "https://www2.census.gov/geo/tiger/GENZ2020/shp/cb_2020_us_state_5m.zip"
+tempshape3 <- tempfile()
+tempshape4 <- tempfile()
+tempshape3 <- curl_download(url=stateshapeurl, destfile=tempshape3, quiet=FALSE, mode="wb")
+unzip(zipfile=tempshape3, exdir=tempshape4)
+
+#The actual shapefile has a different name each time you download it, so need to fish the name out of the unzipped file
+name2 <- list.files(tempshape4, pattern=".shp")[1]
+stateshapefile <- st_read(file.path(tempshape4, name2))
 
 mapdata <- left_join(shapefile, plotdata)
 
@@ -139,9 +155,9 @@ map <- ggplot()+
   scale_fill_identity()+
   theme_void()+
   labs(title="US Counties with high vaccination rates are overwhelmingly Democrat-leaning",
-       subtitle=paste0("Proportion of votes case for Joe Biden in the 2020 US presidential election compared to the proportion of the population who have received\nat least 1 dose of COVID vaccine in US counties. Counties with missing vaccination data appear in black. Vaccination data up to ",
+       subtitle=paste0("Proportion of votes cast for Joe Biden in the 2020 US presidential election compared to the proportion of the population who have received\nat least 1 dose of COVID vaccine in US counties. Counties with missing vaccination data appear in black. Vaccination data up to ",
                       maxdatelab, ".\n"),
-       caption="Vaccination data from CDC | Voting data from Tony McGovern | Plot by @VictimOfMaths")+
+       caption="Vaccination data from CDC | Voting data from Tony McGovern | Shapefile from US Census Bureau | Plot by @VictimOfMaths")+
   theme(text=element_text(family="Lato", colour="White"), plot.title.position="plot",
         plot.caption.position="plot", plot.title=element_text(face="bold", size=rel(1.6), family="Merriweather"),
         plot.background=element_rect(fill="Grey10", colour="Grey10"),
