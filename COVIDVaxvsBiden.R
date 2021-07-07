@@ -54,7 +54,7 @@ votedata <- read.csv(tempvote) %>%
 data <- merge(vaxdata, votedata)
 
 #Save data for anyone who wants to draw their own map
-write.csv("Data/COVIDVaxvsVBidenCounties.csv")
+write.csv(data, "Data/COVIDVaxvsVBidenCounties.csv")
 
 #Scatter plot
 agg_tiff("Outputs/COVIDVaxvsBiden.tiff", units="in", width=7, height=7, res=800)
