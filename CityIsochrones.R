@@ -88,3 +88,31 @@ ggplot(maps %>% filter(max==60), aes(geometry=geometry, colour=city))+
 
 dev.off()
 
+library(purrr)
+library(cowplot)
+
+g <- map(unique(maps$city), function(x) {
+  ggplot(maps %>% filter(city==x), aes(geometry=geometry, alpha=65-max))+
+    geom_sf(colour=NA, show.legend=FALSE, fill="#CF1C90FF")+
+    theme_void()+
+    theme(plot.background=element_rect(fill="Grey10", colour="Grey10"),
+          panel.background=element_rect(fill="Grey10", colour="Grey10"),
+          text=element_text(colour="cornsilk", family="Belltopo Sans"),
+          plot.title=element_text(size=rel(1)))+
+    labs(title=x)
+})
+
+agg_png("IsochroneCitiesFacets.png", units="in", width=8.5, height=10, res=800, background="Grey10")
+plot_grid(plotlist=g)+
+  theme(plot.background=element_rect(fill="Grey10", colour="Grey10"),
+        panel.background=element_rect(fill="Grey10", colour="Grey10"),
+        text=element_text(colour="cornsilk", family="High Alpine"),
+        plot.title.position="plot", plot.caption.position="plot",
+        plot.title=element_text(size=rel(4)),
+        plot.subtitle=element_text(size=rel(1), family="Belltopo Sans"),
+        plot.caption=element_text(size=rel(0.7), family="Belltopo Sans"))+
+  labs(title="The Great Escape",
+       subtitle="\nHow far can you get by car in an hour from the centre of major British cities?",
+       caption="Routing data from OpenStreetMap | Fonts from @sarahbellmaps | Map by @VictimOfMaths")
+
+dev.off()
